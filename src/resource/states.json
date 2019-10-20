@@ -1,0 +1,256 @@
+{
+  "states": [
+    {
+      "value": "An Giang",
+      "text": "An Giang"
+    },
+    {
+      "value": "Bà Rịa–Vũng Tàu",
+      "text": "Bà Rịa–Vũng Tàu"
+    },
+    {
+      "value": "Bình Dương",
+      "text": "Bình Dương"
+    },
+    {
+      "value": "Bình Phước",
+      "text": "Bình Phước"
+    },
+    {
+      "value": "Bình Thuận",
+      "text": "Bình Thuận"
+    },
+    {
+      "value": "Bình Định",
+      "text": "Bình Định"
+    },
+    {
+      "value": "Bạc Liêu",
+      "text": "Bạc Liêu"
+    },
+    {
+      "value": "Bắc Giang",
+      "text": "Bắc Giang"
+    },
+    {
+      "value": "Bắc Kạn",
+      "text": "Bắc Kạn"
+    },
+    {
+      "value": "Bắc Ninh",
+      "text": "Bắc Ninh"
+    },
+    {
+      "value": "Bến Tre",
+      "text": "Bến Tre"
+    },
+    {
+      "value": "Cao Bằng",
+      "text": "Cao Bằng"
+    },
+    {
+      "value": "Cà Mau",
+      "text": "Cà Mau"
+    },
+    {
+      "value": "Cần Thơ",
+      "text": "Cần Thơ"
+    },
+    {
+      "value": "Gia Lai",
+      "text": "Gia Lai"
+    },
+    {
+      "value": "Hà Giang",
+      "text": "Hà Giang"
+    },
+    {
+      "value": "Hà Nam",
+      "text": "Hà Nam"
+    },
+    {
+      "value": "Hà Nội",
+      "text": "Hà Nội"
+    },
+    {
+      "value": "Hà Tĩnh",
+      "text": "Hà Tĩnh"
+    },
+    {
+      "value": "Hòa Bình",
+      "text": "Hòa Bình"
+    },
+    {
+      "value": "Hưng Yên",
+      "text": "Hưng Yên"
+    },
+    {
+      "value": "Hải Dương",
+      "text": "Hải Dương"
+    },
+    {
+      "value": "Hải Phòng",
+      "text": "Hải Phòng"
+    },
+    {
+      "value": "Hậu Giang",
+      "text": "Hậu Giang"
+    },
+    {
+      "value": "Khánh Hòa",
+      "text": "Khánh Hòa"
+    },
+    {
+      "value": "Kiên Giang",
+      "text": "Kiên Giang"
+    },
+    {
+      "value": "Kon Tum",
+      "text": "Kon Tum"
+    },
+    {
+      "value": "Lai Châu",
+      "text": "Lai Châu"
+    },
+    {
+      "value": "Long An",
+      "text": "Long An"
+    },
+    {
+      "value": "Lào Cai",
+      "text": "Lào Cai"
+    },
+    {
+      "value": "Lâm Đồng",
+      "text": "Lâm Đồng"
+    },
+    {
+      "value": "Lạng Sơn",
+      "text": "Lạng Sơn"
+    },
+    {
+      "value": "Nam Định",
+      "text": "Nam Định"
+    },
+    {
+      "value": "Nghệ An",
+      "text": "Nghệ An"
+    },
+    {
+      "value": "Ninh Bình",
+      "text": "Ninh Bình"
+    },
+    {
+      "value": "Ninh Thuận",
+      "text": "Ninh Thuận"
+    },
+    {
+      "value": "Phú Thọ",
+      "text": "Phú Thọ"
+    },
+    {
+      "value": "Phú Yên",
+      "text": "Phú Yên"
+    },
+    {
+      "value": "Quảng Bình",
+      "text": "Quảng Bình"
+    },
+    {
+      "value": "Quảng Nam",
+      "text": "Quảng Nam"
+    },
+    {
+      "value": "Quảng Ngãi",
+      "text": "Quảng Ngãi"
+    },
+    {
+      "value": "Quảng Ninh",
+      "text": "Quảng Ninh"
+    },
+    {
+      "value": "Quảng Trị",
+      "text": "Quảng Trị"
+    },
+    {
+      "value": "Sóc Trăng",
+      "text": "Sóc Trăng"
+    },
+    {
+      "value": "Sơn La",
+      "text": "Sơn La"
+    },
+    {
+      "value": "Thanh Hóa",
+      "text": "Thanh Hóa"
+    },
+    {
+      "value": "Thành phố Hồ Chí Minh",
+      "text": "Thành phố Hồ Chí Minh"
+    },
+    {
+      "value": "Thái Bình",
+      "text": "Thái Bình"
+    },
+    {
+      "value": "Thái Nguyên",
+      "text": "Thái Nguyên"
+    },
+    {
+      "value": "Thừa Thiên–Huế",
+      "text": "Thừa Thiên–Huế"
+    },
+    {
+      "value": "Tiền Giang",
+      "text": "Tiền Giang"
+    },
+    {
+      "value": "Trà Vinh",
+      "text": "Trà Vinh"
+    },
+    {
+      "value": "Tuyên Quang",
+      "text": "Tuyên Quang"
+    },
+    {
+      "value": "Tây Ninh",
+      "text": "Tây Ninh"
+    },
+    {
+      "value": "Vĩnh Long",
+      "text": "Vĩnh Long"
+    },
+    {
+      "value": "Vĩnh Phúc",
+      "text": "Vĩnh Phúc"
+    },
+    {
+      "value": "Yên Bái",
+      "text": "Yên Bái"
+    },
+    {
+      "value": "Điện Biên",
+      "text": "Điện Biên"
+    },
+    {
+      "value": "Đà Nẵng",
+      "text": "Đà Nẵng"
+    },
+    {
+      "value": "Đắk Lắk",
+      "text": "Đắk Lắk"
+    },
+    {
+      "value": "Đắk Nông",
+      "text": "Đắk Nông"
+    },
+    {
+      "value": "Đồng Nai",
+      "text": "Đồng Nai"
+    },
+    {
+      "value": "Đồng Tháp",
+      "text": "Đồng Tháp"
+    }
+  ]
+}

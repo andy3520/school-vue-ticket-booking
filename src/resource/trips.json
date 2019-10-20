@@ -1,0 +1,40 @@
+{
+  "trips": [
+    {
+      "_id": 0,
+      "from": "An Giang",
+      "to": "Bà Rịa–Vũng Tàu",
+      "price": 600000,
+      "date": "20-10-2019",
+      "time": "9:30",
+      "quantity": 30
+    },
+    {
+      "_id": 2,
+      "from": "An Giang",
+      "to": "Bà Rịa–Vũng Tàu",
+      "price": 600000,
+      "date": "20-10-2019",
+      "time": "10:30",
+      "quantity": 30
+    },
+    {
+      "_id": 3,
+      "from": "Bình Dương",
+      "to": "Bình Phước",
+      "price": 120000,
+      "date": "21-10-2019",
+      "time": "16:30",
+      "quantity": 30
+    },
+    {
+      "_id": 4,
+      "from": "Bình Dương",
+      "to": "Bình Phước",
+      "price": 120000,
+      "date": "21-10-2019",
+      "time": "17:30",
+      "quantity": 30
+    }
+  ]
+}
