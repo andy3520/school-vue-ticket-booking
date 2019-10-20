@@ -250,9 +250,7 @@ export default {
       return value > 1000 ? value / 1000 + "K" : value;
     }
   },
-  mounted() {
-    this.bind();
-  }
+  mounted() {}
 };
 </script>
 
