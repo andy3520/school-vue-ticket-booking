@@ -24,7 +24,6 @@
               :options="fromData"
               :class="{'text-muted': from === null}"
               class="text-default font-weight-bold"
-              @change="searchTrip"
             ></b-form-select>
           </base-input>
           <base-input class="col-sm-12 col-md-6">
@@ -32,7 +31,6 @@
               v-model="to"
               :class="{'text-muted': to === null}"
               :options="toData"
-              @change="searchTrip"
               class="text-default font-weight-bold"
             ></b-form-select>
           </base-input>
@@ -44,30 +42,35 @@
               class="form-control datepicker text-default font-weight-bold bg-white"
               placeholder="Ngày Đi"
               v-model="date"
-              @input="searchTrip"
             ></flat-picker>
           </base-input>
           <base-input class="col-sm-12 col-md-6">
             <flat-picker
-              :config="dateConfig"
+              :config="timeConfig"
+              @on-close="updateTime"
               class="form-control datepicker text-default font-weight-bold bg-white"
               placeholder="Giờ khởi hành"
-              v-model="date"
-              @input="searchTrip"
+              v-model="time"
             ></flat-picker>
           </base-input>
         </div>
         <div class="row mt-3">
           <base-input class="col-sm-12 col-md-6">
             <input
-              type="text"
+              v-model="price"
+              @blur="updateNumber(price, $event)"
+              type="number"
+              min="1000"
               class="form-control text-default font-weight-bold"
               placeholder="Giá vé"
             />
           </base-input>
           <base-input class="col-sm-12 col-md-6">
             <input
-              type="text"
+              type="number"
+              v-model="quantity"
+              @blur="updateNumber(quantity, $event)"
+              min="1"
               class="form-control text-default font-weight-bold"
               placeholder="Số lượng vé"
             />
@@ -85,7 +88,7 @@
       <base-alert type="secondary" class="col-12 bg-white rounded my-4 p-0">
         <b-table striped hover :items="tripsData" :fields="fields" responsive class="h-100 mb-0">
           <template v-slot:cell(_id)="data">
-            <base-button block type="primary" @click="bookTicket(data.value)">Edit</base-button>
+            <base-button block type="primary" @click="editTrip(data.value)">Edit</base-button>
           </template>
         </b-table>
       </base-alert>
@@ -99,6 +102,7 @@ import "flatpickr/dist/flatpickr.css";
 import { states } from "@/resource/states.json";
 import { trips } from "@/resource/trips.json";
 import Modal from "@/components/Modal";
+import uuidv1 from "uuid/v1";
 
 export default {
   components: { flatPicker, Modal },
@@ -112,14 +116,18 @@ export default {
       from: null,
       to: null,
       date: null,
+      time: null,
+      price: null,
+      quantity: null,
       tripResult: [],
-      selectedTrip: null,
+      isEdit: false,
       // Data form display form
-      dateConfig: {
+      timeConfig: {
+        enableTime: true,
+        noCalendar: true,
         allowInput: false,
-        dateFormat: "d-m-Y",
-        minDate: "today",
-        mode: "single"
+        dateFormat: "H:i",
+        time_24hr: true
       },
       states: states,
       tripsData: trips,
@@ -145,43 +153,56 @@ export default {
     },
     toData() {
       return [{ value: null, text: "Điểm Đến" }, ...this.states];
+    },
+    dateConfig() {
+      return {
+        allowInput: false,
+        dateFormat: "d-m-Y",
+        minDate: this.isEdit ? null : "today",
+        mode: "single"
+      };
     }
   },
   methods: {
-    searchTrip() {
-      if (!this.from && !this.to && !this.date) return (this.tripResult = []);
-      this.searched = true;
-      this.tripResult = this.tripsData.filter(
-        trip =>
-          trip.from === this.from ||
-          trip.to === this.to ||
-          trip.date === this.date
-      );
-    },
-    bookTicket(id) {
-      this.showForm = true;
-      this.selectedTrip = { ...this.tripResult.find(trip => trip._id === id) };
-      this.selectedTrip.buyQuantity = 1;
-      this.selectedTrip.user = {
-        name: "",
-        phone: "",
-        email: ""
-      };
-    },
     resetForm() {
       this.showForm = false;
-      this.selectedTrip = null;
       this.formStep = 0;
-    },
-    update(obj, prop, event) {
-      this.selectedTrip = { ...this.selectedTrip, ...obj };
-    },
-    submitTicket() {
-      console.log(JSON.stringify(this.selectedTrip));
     },
     addTrip() {
       if (!this.showForm) return (this.showForm = true);
       this.showForm = false;
+      let newTicket = {
+        _id: uuidv1(),
+        from: this.from,
+        to: this.to,
+        date: this.date,
+        time: this.time,
+        price: this.price,
+        quantity: this.quantity
+      };
+      this.from = null;
+      this.to = null;
+      this.date = null;
+      this.time = null;
+      this.price = null;
+      this.quantity = null;
+    },
+    editTrip(id) {
+      const ticket = this.tripsData.find(trip => trip._id === id);
+      this.showForm = true;
+      this.isEdit = true;
+      this.from = ticket.from;
+      this.to = ticket.to;
+      this.date = ticket.date;
+      this.time = ticket.time;
+      this.price = ticket.price;
+      this.quantity = ticket.quantity;
+    },
+    updateTime(selectedDates, dateStr, instance) {
+      this.time = dateStr;
+    },
+    updateNumber(param, event) {
+      param = event.target.value;
     }
   },
   filters: {
