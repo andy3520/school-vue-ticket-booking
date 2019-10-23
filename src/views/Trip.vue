@@ -79,19 +79,61 @@
       </template>
       <div class="row mt-2">
         <base-button
+          v-if="showForm && !isLoading"
+          class="mb-3 mb-sm-0"
+          type="secondary"
+          icon="fa fa-times"
+          @click="resetForm()"
+        >Huỷ</base-button>
+        <base-button
+          v-if="!isEdit"
           class="mb-3 mb-sm-0"
           type="info"
-          icon="ni ni-fat-add"
+          :icon="isLoading ? 'fa fa-spinner' : 'ni ni-fat-add'"
           @click="addTrip"
-        >Tạo chuyến</base-button>
+        >
+          <template v-if="isLoading">
+            <template>Đang tạo chuyến</template>
+          </template>
+          <template v-else>Tạo chuyến</template>
+        </base-button>
+        <base-button
+          v-if="isEdit"
+          class="mb-3 mb-sm-0"
+          type="info"
+          :icon="isLoading ? 'fa fa-spinner' : 'fa fa-floppy-o'"
+          @click="saveTrip"
+        >
+          <template v-if="isLoading">
+            <template>Đang lưu</template>
+          </template>
+          <template v-else>Lưu</template>
+        </base-button>
       </div>
-      <base-alert type="secondary" class="col-12 bg-white rounded my-4 p-0">
+      <base-alert
+        v-if="tripsData.length > 0"
+        type="secondary"
+        class="col-12 bg-white rounded my-4 p-0"
+      >
         <b-table striped hover :items="tripsData" :fields="fields" responsive class="h-100 mb-0">
           <template v-slot:cell(_id)="data">
-            <base-button block type="primary" @click="editTrip(data.value)">Edit</base-button>
+            <div class="row">
+              <base-button block type="primary" @click="editTrip(data.value)" class="col p-1">Edit</base-button>
+              <base-button
+                block
+                type="warning"
+                @click="deleteTrip(data.value)"
+                class="col p-1 mt-0 mr-2"
+              >Delete</base-button>
+            </div>
           </template>
         </b-table>
       </base-alert>
+      <base-alert
+        v-else
+        type="secondary"
+        class="col-12 bg-white rounded my-4 display-4 text-center"
+      >Không có chuyến nào</base-alert>
     </div>
   </section>
 </template>
@@ -103,6 +145,7 @@ import { states } from "@/resource/states.json";
 import { trips } from "@/resource/trips.json";
 import Modal from "@/components/Modal";
 import uuidv1 from "uuid/v1";
+import { Trip } from "@/service/api";
 
 export default {
   components: { flatPicker, Modal },
@@ -113,6 +156,7 @@ export default {
       searched: false,
       formStep: 0,
       // Process data
+      id: null,
       from: null,
       to: null,
       date: null,
@@ -121,6 +165,7 @@ export default {
       quantity: null,
       tripResult: [],
       isEdit: false,
+      isLoading: false,
       // Data form display form
       timeConfig: {
         enableTime: true,
@@ -130,7 +175,7 @@ export default {
         time_24hr: true
       },
       states: states,
-      tripsData: trips,
+      tripsData: [],
       fields: [
         { key: "time", label: "Thời gian", sortable: true },
         { key: "date", label: "Ngày Đi", sortable: true },
@@ -164,14 +209,10 @@ export default {
     }
   },
   methods: {
-    resetForm() {
-      this.showForm = false;
-      this.formStep = 0;
-    },
     addTrip() {
       if (!this.showForm) return (this.showForm = true);
-      this.showForm = false;
-      let newTicket = {
+      this.isLoading = true;
+      let newTrip = {
         _id: uuidv1(),
         from: this.from,
         to: this.to,
@@ -180,17 +221,51 @@ export default {
         price: this.price,
         quantity: this.quantity
       };
-      this.from = null;
-      this.to = null;
-      this.date = null;
-      this.time = null;
-      this.price = null;
-      this.quantity = null;
+
+      Trip.createTrip(newTrip)
+        .then(data => {
+          this.isLoading = false;
+          this.resetForm();
+          this.tripsData = [...[newTrip], ...this.tripsData];
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+    saveTrip() {
+      this.isLoading = true;
+      let newTrip = {
+        _id: this.id,
+        from: this.from,
+        to: this.to,
+        date: this.date,
+        time: this.time,
+        price: this.price,
+        quantity: this.quantity
+      };
+
+      Trip.saveEditTrip(newTrip)
+        .then(data => {
+          this.isLoading = false;
+          this.isEdit = false;
+          this.tripsData = this.tripsData.map(trip => {
+            if (trip._id === newTrip._id) {
+              return newTrip;
+            }
+            return trip;
+          });
+
+          this.resetForm();
+        })
+        .catch(err => {
+          console.log(err);
+        });
     },
     editTrip(id) {
       const ticket = this.tripsData.find(trip => trip._id === id);
       this.showForm = true;
       this.isEdit = true;
+      this.id = ticket._id;
       this.from = ticket.from;
       this.to = ticket.to;
       this.date = ticket.date;
@@ -198,11 +273,30 @@ export default {
       this.price = ticket.price;
       this.quantity = ticket.quantity;
     },
+    deleteTrip(id) {
+      Trip.deleteTrip(id)
+        .then(data => {
+          this.tripsData = this.tripsData.filter(trip => trip._id !== id) || [];
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
     updateTime(selectedDates, dateStr, instance) {
       this.time = dateStr;
     },
     updateNumber(param, event) {
       param = event.target.value;
+    },
+    resetForm() {
+      this.showForm = false;
+      this.id = null;
+      this.from = null;
+      this.to = null;
+      this.date = null;
+      this.time = null;
+      this.price = null;
+      this.quantity = null;
     }
   },
   filters: {
@@ -211,7 +305,15 @@ export default {
       return value > 1000 ? value / 1000 + "K" : value;
     }
   },
-  mounted() {}
+  mounted() {
+    Trip.getAllTrip()
+      .then(data => {
+        this.tripsData = data.Items;
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
 };
 </script>
 
