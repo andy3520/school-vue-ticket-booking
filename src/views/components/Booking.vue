@@ -53,11 +53,23 @@
           </base-input>
         </b-col>
       </b-row>
-      <b-row v-if="tripResult.length > 0">
+      <b-row v-if="tripsData.length > 0 && searched">
         <base-alert type="secondary" class="col-12 bg-white rounded mb-5 p-0">
-          <b-table striped hover :items="tripResult" :fields="fields" responsive class="h-100 mb-0">
+          <b-table striped hover :items="tripsData" :fields="fields" responsive class="h-100 mb-0">
             <template v-slot:cell(_id)="data">
-              <base-button block type="primary" @click="bookTicket(data.value)">Đặt Vé</base-button>
+              <base-button
+                v-if="getTicketById(data.value).quantity > 0"
+                block
+                type="primary"
+                @click="bookTicket(data.value)"
+              >Đặt Vé</base-button>
+              <base-button
+                v-else
+                block
+                type="warning"
+                @click="bookTicket(data.value)"
+                disabled
+              >Hết Vé</base-button>
             </template>
           </b-table>
         </base-alert>
@@ -163,6 +175,8 @@ import "flatpickr/dist/flatpickr.css";
 import { states } from "@/resource/states.json";
 import { trips } from "@/resource/trips.json";
 import Modal from "@/components/Modal";
+import uuidv1 from "uuid/v1";
+import { Trip, Ticket } from "@/service/api";
 
 export default {
   components: { flatPicker, Modal },
@@ -176,7 +190,6 @@ export default {
       from: null,
       to: null,
       date: null,
-      tripResult: [],
       selectedTrip: null,
       // Data form display form
       dateConfig: {
@@ -186,7 +199,7 @@ export default {
         mode: "single"
       },
       states: states,
-      tripsData: trips,
+      tripsData: [],
       fields: [
         { key: "time", label: "Thời gian", sortable: true },
         { key: "date", label: "Ngày Đi", sortable: true },
@@ -213,18 +226,21 @@ export default {
   },
   methods: {
     searchTrip() {
-      if (!this.from && !this.to && !this.date) return (this.tripResult = []);
-      this.searched = true;
-      this.tripResult = this.tripsData.filter(
-        trip =>
-          trip.from === this.from ||
-          trip.to === this.to ||
-          trip.date === this.date
-      );
+      if (!this.from || !this.to || !this.date) return (this.tripsData = []);
+      Trip.getTrips(this.from, this.to, this.date)
+        .then(data => {
+          this.tripsData = data.Items;
+          this.searched = true;
+        })
+        .catch(err => {
+          console.log(err);
+        });
     },
     bookTicket(id) {
       this.showForm = true;
-      this.selectedTrip = { ...this.tripResult.find(trip => trip._id === id) };
+      this.selectedTrip = { ...this.tripsData.find(trip => trip._id === id) };
+      this.selectedTrip._tripId = this.selectedTrip._id;
+      this.selectedTrip._id = uuidv1();
       this.selectedTrip.buyQuantity = 1;
       this.selectedTrip.user = {
         name: "",
@@ -241,7 +257,24 @@ export default {
       this.selectedTrip = { ...this.selectedTrip, ...obj };
     },
     submitTicket() {
-      console.log(JSON.stringify(this.selectedTrip));
+      Ticket.createTicket(this.selectedTrip)
+        .then(data => {
+          const editTrip = this.tripsData.find(
+            trip => this.selectedTrip._tripId === trip._id
+          );
+          editTrip.quantity = editTrip.quantity - this.selectedTrip.buyQuantity;
+          return Trip.saveEditTrip(editTrip);
+        })
+        .then(data => {
+          this.showForm = false;
+          this.formStep = 0;
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+    getTicketById(id) {
+      return this.tripsData.find(trip => trip._id === id);
     }
   },
   filters: {
@@ -250,7 +283,15 @@ export default {
       return value > 1000 ? value / 1000 + "K" : value;
     }
   },
-  mounted() {}
+  mounted() {
+    Trip.getAllTrip()
+      .then(data => {
+        this.tripsData = data.Items;
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
 };
 </script>
 
