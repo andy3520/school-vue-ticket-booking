@@ -26,15 +26,14 @@
                 class="mb-3 mb-sm-0"
                 type="info"
                 icon="ni ni-square-pin"
-                @click="scrollToBooking"
+                @click="scrollToSection('booking')"
               >Đặt Vé</base-button>
               <base-button
-                tag="a"
-                href="#"
                 class="mb-3 mb-sm-0"
                 type="white"
-                icon="ni ni-send"
-              >Liên Hệ</base-button>
+                icon="fa fa-search"
+                @click="scrollToSection('searching')"
+              >Tra thông tin vé</base-button>
             </div>
           </div>
         </div>
@@ -53,8 +52,8 @@
 <script>
 export default {
   methods: {
-    scrollToBooking() {
-      this.$emit("scroll-to-booking");
+    scrollToSection(section) {
+      this.$emit("scroll-to-section", section);
     }
   }
 };

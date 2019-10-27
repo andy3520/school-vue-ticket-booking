@@ -10,9 +10,10 @@
 
       <div class="row" slot="content-header" slot-scope="{closeMenu}">
         <div class="col-6 collapse-brand">
-          <a href="https://demos.creative-tim.com/vue-argon-design-system/documentation/">
-            <img src="img/brand/blue.png" />
-          </a>
+          <span class="display-4">
+            Eco
+            <i class="ni ni-bus-front-12"></i>us
+          </span>
         </div>
         <div class="col-6 collapse-close">
           <close-button @click="closeMenu"></close-button>
@@ -20,29 +21,44 @@
       </div>
 
       <ul class="navbar-nav navbar-nav-hover align-items-lg-center ml-auto">
-        <li class="nav-item">
-          <a slot="title" href="#" class="nav-link" data-toggle="dropdown" role="button">
-            <i class="ni ni-ui-04 d-lg-none"></i>
+        <li class="nav-item pointer">
+          <router-link
+            to="/"
+            tag="a"
+            slot="title"
+            class="nav-link"
+            data-toggle="dropdown"
+            role="button"
+          >
+            <i class="fa fa-ticket d-lg-none"></i>
+            <span class="nav-link-inner--text">Trang chủ</span>
+          </router-link>
+        </li>
+        <li class="nav-item pointer">
+          <router-link
+            tag="a"
+            to="/booking"
+            slot="title"
+            class="nav-link"
+            data-toggle="dropdown"
+            role="button"
+          >
+            <i class="fa fa-ticket d-lg-none"></i>
             <span class="nav-link-inner--text">Đặt Vé</span>
-          </a>
+          </router-link>
         </li>
         <li class="nav-item">
-          <a slot="title" href="#" class="nav-link" data-toggle="dropdown" role="button">
-            <i class="ni ni-collection d-lg-none"></i>
-            <span class="nav-link-inner--text">Liên Hệ</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a slot="title" href="#" class="nav-link" data-toggle="dropdown" role="button">
-            <i class="ni ni-collection d-lg-none"></i>
-            <span class="nav-link-inner--text">Giới Thiệu</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a slot="title" href="#" class="nav-link" data-toggle="dropdown" role="button">
-            <i class="ni ni-collection d-lg-none"></i>
-            <span class="nav-link-inner--text">Điều Khoản</span>
-          </a>
+          <router-link
+            tag="a"
+            to="/search"
+            slot="title"
+            class="nav-link pointer"
+            data-toggle="dropdown"
+            role="button"
+          >
+            <i class="fa fa-search d-lg-none"></i>
+            <span class="nav-link-inner--text">Tra cứu</span>
+          </router-link>
         </li>
       </ul>
     </base-nav>
@@ -61,5 +77,8 @@ export default {
   }
 };
 </script>
-<style>
+<style scoped>
+.pointer:hover {
+  cursor: pointer;
+}
 </style>

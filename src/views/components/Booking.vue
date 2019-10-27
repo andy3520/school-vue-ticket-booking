@@ -16,7 +16,7 @@
       class="container min-h-full d-flex flex-column align-content-center justify-content-center py-auto"
     >
       <b-row>
-        <b-col cols="12" class="display-1 text-white text-center">Đặt Vé</b-col>
+        <b-col cols="12" class="display-1 text-white text-center">ĐẶT VÉ</b-col>
       </b-row>
       <b-row class="mt-5">
         <b-col sm="12" md="4">
@@ -53,7 +53,10 @@
           </base-input>
         </b-col>
       </b-row>
-      <b-row v-if="tripsData.length > 0 && searched">
+      <b-row>
+        <base-alert class="col-12" v-show="isAlert" :type="alertType">{{ alertMessage }}</base-alert>
+      </b-row>
+      <b-row v-if="tripsData.length > 0 && searched && !isFetching">
         <base-alert type="secondary" class="col-12 bg-white rounded mb-5 p-0">
           <b-table striped hover :items="tripsData" :fields="fields" responsive class="h-100 mb-0">
             <template v-slot:cell(_id)="data">
@@ -75,10 +78,11 @@
         </base-alert>
       </b-row>
       <base-alert
-        v-else-if="searched"
+        v-else-if="searched && !isFetching"
         type="secondary"
         class="text-center"
       >Không tìm thấy chuyến đi phù hợp</base-alert>
+      <base-alert v-if="isFetching" type="secondary" class="text-center">Tìm kiếm...</base-alert>
     </div>
     <modal :show="showForm" :showClose="false">
       <template slot="header">
@@ -130,9 +134,11 @@
                 <b-td>
                   <base-input>
                     <input
+                      :disabled="isBooking"
                       v-model="selectedTrip.user.name"
                       @keyup="update(selectedTrip, 'user.name', $event)"
                       type="text"
+                      placeholder="Họ tên"
                     />
                   </base-input>
                 </b-td>
@@ -141,7 +147,12 @@
                 <b-td>Số điện thoại:</b-td>
                 <b-td>
                   <base-input>
-                    <input v-model="selectedTrip.user.phone" type="phone" />
+                    <input
+                      :disabled="isBooking"
+                      v-model="selectedTrip.user.phone"
+                      type="phone"
+                      placeholder="Số điện thoại"
+                    />
                   </base-input>
                 </b-td>
               </b-tr>
@@ -149,7 +160,12 @@
                 <b-td>Email:</b-td>
                 <b-td>
                   <base-input>
-                    <input v-model="selectedTrip.user.email" type="email" />
+                    <input
+                      :disabled="isBooking"
+                      v-model="selectedTrip.user.email"
+                      type="email"
+                      placeholder="Email"
+                    />
                   </base-input>
                 </b-td>
               </b-tr>
@@ -162,8 +178,16 @@
         <base-button type="primary" @click="formStep = 1">Tiếp theo: Điền thông tin người đặt</base-button>
       </template>
       <template v-if="formStep === 1" slot="footer">
-        <base-button type="secondary" @click="formStep = 0">Quay lại: Thông tin vé</base-button>
-        <base-button type="primary" @click="submitTicket">Đặt vé</base-button>
+        <base-button
+          type="secondary"
+          @click="formStep = 0"
+          :disabled="isBooking"
+        >Quay lại: Thông tin vé</base-button>
+        <base-button
+          type="primary"
+          @click="submitTicket"
+          :disabled="isBooking"
+        >{{ isBooking ? 'Loading...' : 'Đặt vé'}}</base-button>
       </template>
     </modal>
   </section>
@@ -186,6 +210,11 @@ export default {
       showForm: false,
       searched: false,
       formStep: 0,
+      isAlert: false,
+      isBooking: false,
+      alertType: "success",
+      alertMessage: "Info",
+      isFetching: false,
       // Process data
       from: null,
       to: null,
@@ -218,15 +247,20 @@ export default {
   },
   computed: {
     fromData() {
-      return [{ value: null, text: "Điểm Đi" }, ...this.states];
+      return [{ value: null, text: "Điểm Đi" }, ...this.states].filter(
+        state => state.text !== this.to
+      );
     },
     toData() {
-      return [{ value: null, text: "Điểm Đến" }, ...this.states];
+      return [{ value: null, text: "Điểm Đến" }, ...this.states].filter(
+        state => state.text !== this.from
+      );
     }
   },
   methods: {
     searchTrip() {
       if (!this.from || !this.to || !this.date) return (this.tripsData = []);
+      this.isFetching = true;
       Trip.getTrips(this.from, this.to, this.date)
         .then(data => {
           this.tripsData = data.Items;
@@ -234,6 +268,9 @@ export default {
         })
         .catch(err => {
           console.log(err);
+        })
+        .finally(() => {
+          this.isFetching = false;
         });
     },
     bookTicket(id) {
@@ -247,6 +284,8 @@ export default {
         phone: "",
         email: ""
       };
+      this.selectedTrip.buyTime = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
+      this.selectedTrip.status = "Chờ duyệt";
     },
     resetForm() {
       this.showForm = false;
@@ -257,19 +296,37 @@ export default {
       this.selectedTrip = { ...this.selectedTrip, ...obj };
     },
     submitTicket() {
+      this.selectedTrip.user.email = this.selectedTrip.user.email || "Trống";
+      this.isBooking = true;
       Ticket.createTicket(this.selectedTrip)
         .then(data => {
           const editTrip = this.tripsData.find(
             trip => this.selectedTrip._tripId === trip._id
           );
           editTrip.quantity = editTrip.quantity - this.selectedTrip.buyQuantity;
-          return Trip.saveEditTrip(editTrip);
-        })
-        .then(data => {
+          this.isAlert = true;
+          this.alertMessage =
+            "Đặt vé thành công. Sẽ có nhân viên liên hệ xác nhận trong 24 giờ.";
+          this.alertType = "success";
           this.showForm = false;
           this.formStep = 0;
+          this.isBooking = false;
+          setTimeout(() => {
+            this.isAlert = false;
+            this.alertMessage = "";
+            this.alertType = "success";
+          }, 5000);
+          return Trip.saveEditTrip(editTrip);
         })
         .catch(err => {
+          this.isAlert = true;
+          this.alertMessage = "Đã xảy ra lỗi vui lòng thử lại";
+          this.alertType = "waring";
+          setTimeout(() => {
+            this.isAlert = false;
+            this.alertMessage = "";
+            this.alertType = "success";
+          }, 5000);
           console.log(err);
         });
     },
@@ -295,7 +352,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .bg-main {
   background-image: url("/img/banner-main-vi.jpg");
   background-size: cover;

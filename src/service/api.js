@@ -147,6 +147,13 @@ export const Ticket = {
     return res
   },
 
+  getTicketByPhone: async function(phone) {
+    const url = `${this.TICKET_URL}/${phone}`
+    const res = await this.getData(url)
+
+    return res
+  },
+
   saveEditTicket: async function(ticket) {
     const url = this.TICKET_URL
     const res = await this.putData(url, ticket)

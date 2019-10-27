@@ -20,6 +20,7 @@
         <div class="row mt-5">
           <base-input class="col-sm-12 col-md-6">
             <b-form-select
+              :disabled="isSubmit"
               v-model="from"
               :options="fromData"
               :class="{'text-muted': from === null}"
@@ -28,6 +29,7 @@
           </base-input>
           <base-input class="col-sm-12 col-md-6">
             <b-form-select
+              :disabled="isSubmit"
               v-model="to"
               :class="{'text-muted': to === null}"
               :options="toData"
@@ -38,6 +40,7 @@
         <div class="row mt-3">
           <base-input class="col-sm-12 col-md-6">
             <flat-picker
+              :disabled="isSubmit"
               :config="dateConfig"
               class="form-control datepicker text-default font-weight-bold bg-white"
               placeholder="Ngày Đi"
@@ -46,6 +49,7 @@
           </base-input>
           <base-input class="col-sm-12 col-md-6">
             <flat-picker
+              :disabled="isSubmit"
               :config="timeConfig"
               @on-close="updateTime"
               class="form-control datepicker text-default font-weight-bold bg-white"
@@ -57,6 +61,7 @@
         <div class="row mt-3">
           <base-input class="col-sm-12 col-md-6">
             <input
+              :disabled="isSubmit"
               v-model="price"
               @blur="updateNumber(price, $event)"
               type="number"
@@ -67,6 +72,7 @@
           </base-input>
           <base-input class="col-sm-12 col-md-6">
             <input
+              :disabled="isSubmit"
               type="number"
               v-model="quantity"
               @blur="updateNumber(quantity, $event)"
@@ -79,6 +85,7 @@
       </template>
       <div class="row mt-2">
         <base-button
+          :disabled="isSubmit"
           v-if="showForm && !isLoading"
           class="mb-3 mb-sm-0"
           type="secondary"
@@ -86,7 +93,8 @@
           @click="resetForm()"
         >Huỷ</base-button>
         <base-button
-          v-if="!isEdit"
+          :disabled="isSubmit"
+          v-if="!isEdit && !isFetching"
           class="mb-3 mb-sm-0"
           type="info"
           :icon="isLoading ? 'fa fa-spinner' : 'ni ni-fat-add'"
@@ -98,6 +106,7 @@
           <template v-else>Tạo chuyến</template>
         </base-button>
         <base-button
+          :disabled="isSubmit"
           v-if="isEdit"
           class="mb-3 mb-sm-0"
           type="info"
@@ -118,9 +127,16 @@
         <b-table striped hover :items="tripsData" :fields="fields" responsive class="h-100 mb-0">
           <template v-slot:cell(_id)="data">
             <div class="row">
-              <base-button block type="primary" @click="editTrip(data.value)" class="col p-1">Edit</base-button>
+              <base-button
+                :disabled="isSubmit"
+                block
+                type="primary"
+                @click="editTrip(data.value)"
+                class="col p-1"
+              >Edit</base-button>
               <base-button
                 block
+                :disabled="isSubmit"
                 type="warning"
                 @click="deleteTrip(data.value)"
                 class="col p-1 mt-0 mr-2"
@@ -133,7 +149,7 @@
         v-else
         type="secondary"
         class="col-12 bg-white rounded my-4 display-4 text-center"
-      >Không có chuyến nào</base-alert>
+      >{{ isFetching ? 'Loading...' : 'Không có chuyến nào' }}</base-alert>
     </div>
   </section>
 </template>
@@ -166,6 +182,8 @@ export default {
       tripResult: [],
       isEdit: false,
       isLoading: false,
+      isFetching: false,
+      isSubmit: false,
       // Data form display form
       timeConfig: {
         enableTime: true,
@@ -194,10 +212,14 @@ export default {
   },
   computed: {
     fromData() {
-      return [{ value: null, text: "Điểm Đi" }, ...this.states];
+      return [{ value: null, text: "Điểm Đi" }, ...this.states].filter(
+        state => state.text !== this.to
+      );
     },
     toData() {
-      return [{ value: null, text: "Điểm Đến" }, ...this.states];
+      return [{ value: null, text: "Điểm Đến" }, ...this.states].filter(
+        state => state.text !== this.from
+      );
     },
     dateConfig() {
       return {
@@ -211,20 +233,22 @@ export default {
   methods: {
     addTrip() {
       if (!this.showForm) return (this.showForm = true);
+      this.isSubmit = true;
       this.isLoading = true;
       let newTrip = {
         _id: uuidv1(),
-        from: this.from,
-        to: this.to,
-        date: this.date,
-        time: this.time,
-        price: this.price,
-        quantity: this.quantity
+        from: this.from || " ",
+        to: this.to || " ",
+        date: this.date || " ",
+        time: this.time || " ",
+        price: this.price || 0,
+        quantity: this.quantity || 0
       };
 
       Trip.createTrip(newTrip)
         .then(data => {
           this.isLoading = false;
+          this.isSubmit = false;
           this.resetForm();
           this.tripsData = [...[newTrip], ...this.tripsData];
         })
@@ -234,6 +258,7 @@ export default {
     },
     saveTrip() {
       this.isLoading = true;
+      this.isSubmit = true;
       let newTrip = {
         _id: this.id,
         from: this.from,
@@ -247,6 +272,7 @@ export default {
       Trip.saveEditTrip(newTrip)
         .then(data => {
           this.isLoading = false;
+          this.isSubmit = false;
           this.isEdit = false;
           this.tripsData = this.tripsData.map(trip => {
             if (trip._id === newTrip._id) {
@@ -297,6 +323,15 @@ export default {
       this.time = null;
       this.price = null;
       this.quantity = null;
+    },
+    validateState(ref) {
+      if (
+        this.veeFields[ref] &&
+        (this.veeFields[ref].dirty || this.veeFields[ref].validated)
+      ) {
+        return !this.veeErrors.has(ref);
+      }
+      return null;
     }
   },
   filters: {
@@ -306,9 +341,11 @@ export default {
     }
   },
   mounted() {
+    this.isFetching = true;
     Trip.getAllTrip()
       .then(data => {
         this.tripsData = data.Items;
+        this.isFetching = false;
       })
       .catch(err => {
         console.log(err);

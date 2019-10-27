@@ -14,16 +14,13 @@
         <div class="col-md-6">
           <ul class="nav nav-footer justify-content-end">
             <li class="nav-item">
-              <a href="#" class="nav-link">Đặt Vé</a>
+              <router-link tag="a" to="/" class="nav-link">Trang chủ</router-link>
             </li>
             <li class="nav-item">
-              <a href="#" class="nav-link">Giới Thiệu</a>
+              <router-link tag="a" to="/booking" class="nav-link">Đặt vé</router-link>
             </li>
             <li class="nav-item">
-              <a href="#" class="nav-link">Điêu Khoản</a>
-            </li>
-            <li class="nav-item">
-              <a href="#" class="nav-link">Liên Hệ</a>
+              <router-link to="/search" tag="a" class="nav-link">Tra cứu</router-link>
             </li>
           </ul>
         </div>
